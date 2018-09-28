@@ -2,27 +2,45 @@
 <head>
     <meta charset="utf-8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
     <script src="_/slider.js"></script>
     <script src='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.js'></script>
     <link href='_/base.css' rel='stylesheet' />
     <link href='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.css' rel='stylesheet' />
     <link rel="stylesheet" href="_/slider.css" href="">
-<!--     <svg width="2000" height="2000" id="map"></svg>
+    <!--script src='app.js'></script>
+   <svg width="2000" height="2000" id="map"></svg>
     <svg width="2000" height="200" id="svg2"></svg> -->
 
 </head>
 
 <body>
+  <div id="parent">
+ 
     <div id="map"> </div>
-     <!-- <h2>Default slider</h2>
+    
+      <div class="titleDiv">
+        <center>
+    <h1>Gun Deaths in the US</h1>
+    <h4>December 2012 - December 2013&nbsp;&nbsp;</h4>
+    </center>
+  </div>
 
+
+    <div class="infoDiv"></div>
+
+    <div id="slider"></div>
+<div id="vis"></div>
+
+  <div id="radio">
+  <input type="radio" name="location" value="1"  checked> States<br>
+  <input type="radio" name="location" value="0" > Cities<br>
+    </div>
+     <!-- <h2>Default slider</h2>
+  
   <code>d3.slider()</code>
   <div id='ggrade'></div> -->
-  <div id="radio">
-  <form>
-  <input type="radio" name="Aggregate" value="States" checked> States<br>
-  <input type="radio" name="Aggregate" value="Cities"> Cities<br>
-</form> 
+  
 </div>
   <script src='app.js'></script>
 </body>

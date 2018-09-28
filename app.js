@@ -29,6 +29,22 @@
     .rollup(function(leaves) { return leaves.length; })
     .entries(data);
 
+    var cities = d3.nest()
+        .key(function(d) { return d.city; })
+        .rollup(function(leaves) { return leaves.length; })
+        .entries(data);
+
+
+        var aggreCityLat = d3.nest()
+        .key(function(d) { return d.city; })
+        .rollup(function(v) { return d3.mean(v, function(d) { return d.lat; }); })
+        .entries(data);
+
+        var aggreCityLng = d3.nest()
+        .key(function(d) { return d.city; })
+        .rollup(function(v) { return d3.mean(v, function(d) { return d.lng; }); })
+        .entries(data);
+
     console.log(states[0]);
 
     var aggreStateLat = d3.nest()
@@ -44,6 +60,44 @@
     minDeathCountperState = (d3.min(states, function(d) { return d.values; }));
     maxDeathCountperState = (d3.max(states, function(d) { return d.values; }));
 
+
+        function findcoOrdCity(key){
+                    // console.log("key is", key);
+                    var lat   = findlatCity(key);
+                    var lng   = findlngCity(key);
+                    // console.log(lat);
+                    // console.log(lng);
+                    let coord = {};
+                    coord["lat"] = String(lat.toFixed(3));
+                    coord["lng"] = String(lng.toFixed(3));
+                    return coord;
+                }
+
+    function findlatCity(lat){
+                    // console.log("inlat", lat);
+                    for(i in aggreCityLat ){
+                        if(aggreCityLat[i].key == String(lat)){
+                    // console.log("My value is: ", aggreStateLat[i].values);
+                    return aggreCityLat[i].values;
+                }
+            }
+        }
+
+    function findlngCity(lng){
+            for(i in aggreCityLng ){
+                if(aggreCityLng[i].key == String(lng)){
+                    // console.log("My value is: ", aggreStateLng[i].values);
+                    return aggreCityLng[i].values;
+                }
+            }
+
+        }
+
+
+    var div = d3.select("body").append("div")   
+        .attr("class", "tooltip")               
+        .style("opacity", 0);
+
     // function findvalues
 
     // function convertRadius(newr){
@@ -52,7 +106,11 @@
         .range([3,33]);
 
 
-        var dots = g.selectAll("circle.dot").data(states)
+        var circRadiusCities = d3.scale.linear()
+        .domain([1,408])
+        .range([4,40]);
+
+        var dots = g.selectAll("circle.dot").data(cities)
 
         console.log(data[0]);
         dots.enter()
@@ -105,6 +163,49 @@
            }
 
            }
+
+           var aggreGender = d3.nest()
+        .key(function(d) { return d.gender; })
+        .key(function(d) { return d.city; })
+        // .rollup(function(v) { return v.length; })
+        .entries(data);
+
+    
+
+        var femaleDeathsInCity = aggreGender[0].values;
+        var maleDeathsInCity = aggreGender[1].values;
+        // console.log("2: ",femaleDeathsInCities.length);
+
+        // aggreFemale[1].values[].values.length
+
+        function genderCount(city){
+            let count = {};
+            for(i in femaleDeathsInCity){
+
+                if(femaleDeathsInCity[i].key == city ){
+                    // console.log("Fcount: ", femaleDeathsInCities[i].values.length );
+                    count["female"] = femaleDeathsInCity[i].values.length;
+                }
+
+            }
+            for(i in maleDeathsInCity){
+                if(maleDeathsInCity[i].key == city ){
+                    // console.log("Fcount: ", femaleDeathsInCities[i].values.length );
+                    count["male"] = maleDeathsInCity[i].values.length;
+                }
+                
+            }
+
+            if(count["female"]==undefined){
+                count["female"]=0;
+
+            }
+             if(count["male"]==undefined){
+                count["male"]=0;
+
+            }
+            return count;
+        }
            // console.log("checklat", findlat("CO"));
 
            // CO = "CO";
@@ -116,14 +217,31 @@
 
            
                 dots.attr({
-                cx: function(d){ return project(findcoOrd(d.key)).x},
-                cy: function (d){ return project(findcoOrd(d.key)).y},
-                r: function(d){ return circRadius(d.values)},
+                cx: function(d){ return project(findcoOrdCity(d.key)).x},
+                cy: function (d){ return project(findcoOrdCity(d.key)).y},
+                r: function(d){ return circRadiusCities(d.values)},
                 stroke: "red",
                 fill: "blue" ,
                 opacity: "0.4" ,
-                hover: "red"            
+               class: 'circle'              
             })
+            .on("mouseover", function(d){   
+                      d3.select(this).classed('active', true)
+                      div.transition()      
+                .duration(200)      
+                .style("opacity", .9);      
+                div .html("County: " + d.key + "<br/>" +"<br/>" + "No. of Deaths: " + d.values + "<br/>" + 
+                "Female: " + (genderCount(d.key)).female +"<br/>"+ "Male: " + (genderCount(d.key)).male  )  
+                .style("left", (d3.event.pageX) + "px")     
+                .style("top", (d3.event.pageY - 100) + "px");    
+
+                  })
+                   .on("mouseout", function(d){
+                      d3.select(this).classed('active', false)
+                      div.transition()      
+                .duration(500)      
+                .style("opacity", 0);   
+                  });
         }
         render();
 
@@ -136,6 +254,34 @@
 
     
     // }
+
+
+        var deathCount = d3.nest()
+        .key(function(d) { return d.gender; })
+        .rollup(function(leaves) { return leaves.length; })
+        .entries(data); 
+
+
+
+        var ageGroup = d3.nest()
+        .key(function(d) { return d.ageGroup; })
+        .rollup(function(leaves) { return leaves.length; })
+        .entries(data);
+
+    var html = "";
+        html    += "<table>";
+        html    += "  <tr class='dead'><td>Total Deaths</td><td class='data'>" + data.length + "</td></tr>";
+        html    += "  <tr><td>Total Number of Cities</td><td class='data'>" + cities.length + "</td></tr>";
+        html    += "  <tr><td>Total Number of States</td><td class='data'>" + states.length + "</td></tr>";
+        html    += "  <tr><td>Identified Number of Males</td><td class='data'>" + deathCount[1].values + "</td></tr>";
+        html    += "  <tr><td>Identified Number of Females</td><td class='data'>" + deathCount[0].values + "</td></tr>";
+        html    += "  <tr class='ageGroup'><td> Identified Age Groups:</td><td class='data'>" + "</td></tr>";
+        html    += "  <tr><td>Ages Under 13 : Child</td><td class='data'>" + ageGroup[1].values + "</td></tr>";
+        html    += "  <tr><td>Ages between 13 and 17 : Teen </td><td class='data'>" + ageGroup[2].values + "</td></tr>";
+        html    += "  <tr><td>Ages 18 and above : Adult </td><td class='data'>" + ageGroup[3].values + "</td></tr>";
+        html    += "</table>"
+    
+    d3.select(".infoDiv").html(html)
 
     console.log("newr",circRadius(1150));
 
